@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather App</title>
+  <style>
+    :root {
+      --tale-color-1: #b2d8d8;
+      --tale-color-2: #66b2b2;
+      --tale-color-3: #008080;
+      --tale-color-4: #006666;
+      --tale-color-5: #004c4c;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Verdana, Geneva, sans-serif;
+      background: var(--tale-color-5);
+      color: #fff;
+    }
+
+    .main__container {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .app__container {
+      width: fit-content;
+      padding: 0.35rem;
+      border-radius: 5px;
+      background-image: linear-gradient(in lch, var(--tale-color-5), var(--tale-color-4), var(--tale-color-3), var(--tale-color-2), var(--tale-color-1));
+      border: 1px solid #fff;
+      box-shadow: 0px 0px 5px white;
+    }
+
+    .inp__sec {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    input[type="text"],
+    button[type="button"] {
+      padding: 0.4rem 0.9rem;
+      border-radius: 5px;
+      color: #006666;
+      background: #b2d8d8;
+      font-weight: bold;
+      border: 1px solid #004c4c;
+      transition: all 150ms ease;
+    }
+
+    button[type="button"]:hover {
+      border: 1px solid #66b2b2;
+      background: #004c4c;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .screen__sec {
+      padding: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 0.5rem;
+      border-radius: 6px;
+      border-bottom: 1px solid white;
+      background: var(--tale-color-5);
+    }
+
+    .screen__sec small {
+      padding: 0.5rem 0;
+    }
+
+    .current__state {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      background: var(--tale-color-1);
+      color: #004c4c;
+      padding: 0.5rem 0;
+      border-radius: 5px;
+    }
+
+    .current__state span {
+      font-size: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="main__container">
+    <div class="app__container">
+      <!-- input section -->
+      <div class="inp__sec">
+        <input data-input-field placeholder="Enter location" type="text">
+        <button onclick="searchData()" type="button">Search</button>
+      </div>
+      <!-- output section -->
+      <div data-screen class="screen__sec">
+        <span class="current__state">
+          <img src="https://cdn.weatherapi.com/weather/64x64/day/353.png" alt="" srcset="">
+          <small><span class="value">26</span>&deg;C</small>
+        </span>
+        <span class="value">Light rain shower</span>
+        <small>Feels like <span class="value">24</span>&deg;C</small>
+        <small>Wind Direction: <span class="value">South southeast</span></small>
+        <small>Precipitation: <span class="value">24</span>mm</small>
+        <small>Humidity: <span class="value">50</span>%</small>
+        <small>CLoud coverage: <span class="value">60</span>%</small>
+        <small>UV Index: <span class="value">5.0</span></small>
+      </div>
+    </div>
+    <script>
+      let obj = {
+        img: null,
+        currentTemp: null,
+        text: null,
+        feelslikeTemp: null,
+        windSpeed: null,
+        windDirection: null,
+        precipitation: null,
+        humidity: null,
+        cloudCoverage: null,
+        uvIndex: null
+      }
+
+      const searchData = function () {
+        let inpValue = document.querySelector("[data-input-field]").value.toLowerCase()
+        getData(inpValue);
+      }
+
+      async function getData(locationStr) {
+        const url = `http://api.weatherapi.com/v1/current.json?key=1dc74852825d42d7af7180718242307&q=${locationStr}&aqi=yes`;
+        try {
+          const response = await fetch(url);
+          if (!response.ok) {
+            throw new Error(`Response status: ${response.status}`);
+          }
+
+          const json = await response.json();
+          // update into object.
+          obj.img = json.current.condition.icon;
+          obj.text = json.current.condition.text;
+          obj.currentTemp = json.current.temp_c;
+          obj.feelslikeTemp = json.current.feelslike_c;
+          obj.windSpeed = json.current.wind_kph;
+          obj.windDirection = json.current.wind_dir;
+          obj.precipitation = json.current.precip_mm;
+          obj.humidity = json.current.humidity;
+          obj.cloudCoverage = json.current.cloud;
+          obj.uvIndex = json.current.uv;
+        } catch (error) {
+          console.error(error.message);
+        }
+        addToDisplay(obj)
+      }
+
+      function addToDisplay({ img, currentTemp, text, feelslikeTemp, windSpeed, windDirection, precipitation, humidity, cloudCoverage, uvIndex }) {
+        document.querySelector('[data-screen]').innerHTML = `<span class="current__state">
+  <img src=${img} alt="" srcset="">
+  <small><span class="value">${currentTemp}</span>&deg;C</small>
+  </span>
+  <span class="value">${text}</span>
+  <small>Feels like <span class="value">${feelslikeTemp}</span>&deg;C</small>
+  <small>Feels like <span class="value">${windSpeed}</span>&deg;C</small>
+  <small>Wind Direction: <span class="value">${windDirection}</span></small>
+  <small>Precipitation: <span class="value">${precipitation}</span>mm</small>
+  <small>Humidity: <span class="value">${humidity}</span>%</small>
+  <small>CLoud coverage: <span class="value">${cloudCoverage}</span>%</small>
+  <small>UV Index: <span class="value">${uvIndex}</span></small>`;
+      }
+
+    </script>
+</body>
+
+</html>
